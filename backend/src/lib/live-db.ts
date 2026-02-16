@@ -125,7 +125,7 @@ export async function upsertBotPerformanceFromWallet(
       is_active,
       updated_at
     ) VALUES (
-      gen_random_uuid(),
+      app_uuid(),
       $1,
       $2,
       'On-chain copy',

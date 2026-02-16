@@ -1,3 +1,5 @@
+import "dotenv/config";
+
 export interface AppEnv {
   PORT: number;
   HOST: string;

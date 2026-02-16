@@ -1,13 +1,22 @@
-CREATE EXTENSION IF NOT EXISTS pgcrypto;
+CREATE OR REPLACE FUNCTION app_uuid() RETURNS UUID AS $$
+  SELECT (
+    SUBSTRING(md5(random()::text || clock_timestamp()::text), 1, 8) || '-' ||
+    SUBSTRING(md5(random()::text || clock_timestamp()::text), 1, 4) || '-' ||
+    '4' || SUBSTRING(md5(random()::text || clock_timestamp()::text), 1, 3) || '-' ||
+    SUBSTRING('89ab', (floor(random() * 4)::int + 1), 1) ||
+      SUBSTRING(md5(random()::text || clock_timestamp()::text), 1, 3) || '-' ||
+    SUBSTRING(md5(random()::text || clock_timestamp()::text), 1, 12)
+  )::uuid;
+$$ LANGUAGE SQL VOLATILE;
 
 CREATE TABLE IF NOT EXISTS users (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  id UUID PRIMARY KEY DEFAULT app_uuid(),
   wallet_address TEXT UNIQUE NOT NULL,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS bots (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  id UUID PRIMARY KEY DEFAULT app_uuid(),
   name TEXT NOT NULL,
   wallet_address TEXT UNIQUE NOT NULL,
   strategy TEXT NOT NULL,
@@ -59,7 +68,7 @@ CREATE TABLE IF NOT EXISTS watchlist_entries (
 );
 
 CREATE TABLE IF NOT EXISTS alerts (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  id UUID PRIMARY KEY DEFAULT app_uuid(),
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   bot_id UUID REFERENCES bots(id) ON DELETE SET NULL,
   alert_type TEXT NOT NULL,
@@ -71,7 +80,7 @@ CREATE TABLE IF NOT EXISTS alerts (
 );
 
 CREATE TABLE IF NOT EXISTS copy_trade_requests (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  id UUID PRIMARY KEY DEFAULT app_uuid(),
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   source_bot_id UUID NOT NULL REFERENCES bots(id) ON DELETE CASCADE,
   source_wallet_address TEXT NOT NULL,

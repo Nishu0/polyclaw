@@ -11,7 +11,7 @@ export function Footer() {
           >
             whatshot
           </span>
-          <span className="text-sm font-bold text-gray-300">Molt © 2024</span>
+          <span className="text-sm font-bold text-gray-300">Molt © 2026</span>
         </div>
         <div className="flex gap-8">
           <Link

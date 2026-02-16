@@ -14,29 +14,23 @@ Fastify API for the Polymarket tracking/copy-trading frontend.
 
 This is API-first (routes), not terminal-based trading.
 
-## 1) Start PostgreSQL
-
-From `/Users/nisargthakkar/Projects/polymarket-molt/backend`:
-
-```bash
-docker compose up -d
-```
-
-## 2) Install and configure
+## 1) Install and configure
 
 ```bash
 cp .env.example .env
 bun install
 ```
 
-## 3) Migrate + seed
+Set `DATABASE_URL` in `.env` to your production PostgreSQL connection string.
+
+## 2) Migrate + seed
 
 ```bash
 bun run db:migrate
 bun run db:seed
 ```
 
-## 3.1) Drizzle schema workflow
+## 2.1) Drizzle schema workflow
 
 ```bash
 bun run db:generate
@@ -50,7 +44,7 @@ bun run db:push
 bun run db:studio
 ```
 
-## 4) Run API
+## 3) Run API
 
 ```bash
 bun run dev

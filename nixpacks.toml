@@ -1,5 +1,2 @@
 [phases.setup]
 nixPkgs = ["nodejs_20", "bun"]
-
-[phases.build]
-cmds = ["cd backend && bun install && bun run build"]

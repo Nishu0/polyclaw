@@ -5,9 +5,6 @@
     "buildCommand": "cd backend && bun install && bun run build"
   },
   "deploy": {
-    "startCommand": "cd backend && bun run db:migrate && bun run start",
-    "healthcheckPath": "/health",
-    "restartPolicyType": "ON_FAILURE",
-    "restartPolicyMaxRetries": 10
+    "startCommand": "cd backend && bun run db:migrate && bun run start"
   }
 }

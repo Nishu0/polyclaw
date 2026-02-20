@@ -1,102 +1,35 @@
 "use client";
 
 import { useState } from "react";
+import type { WatchlistBot } from "@/lib/api";
+import { formatPct, formatUsd, timeAgo } from "@/lib/format";
 
-interface Bot {
-  id: string;
-  name: string;
-  address: string;
-  avatar: string;
-  avatarColor: string;
-  strategy: string;
-  strategyColor: string;
-  sevenDay: string;
-  sevenDayColor: string;
-  thirtyDay: string;
-  thirtyDayPnL: string;
-  drawdown: string;
-  lastTrade: string;
-  todayPnL: string;
-  todayPnLColor: string;
+interface WatchlistTableProps {
+  bots: WatchlistBot[];
 }
 
-const bots: Bot[] = [
-  {
-    id: "1",
-    name: "Alpha Centauri",
-    address: "0x7a...9b2",
-    avatar: "MR",
-    avatarColor: "from-purple-600 to-blue-600 text-white",
-    strategy: "Mean Reversion",
-    strategyColor: "bg-blue-500/10 text-blue-400 border-blue-500/20",
-    sevenDay: "+4.2%",
-    sevenDayColor: "text-emerald-500",
-    thirtyDay: "+18.5%",
-    thirtyDayPnL: "+$2,450",
-    drawdown: "3.2%",
-    lastTrade: "2m ago",
-    todayPnL: "+$120",
-    todayPnLColor: "text-emerald-500",
-  },
-  {
-    id: "2",
-    name: "Delta Arbitrage",
-    address: "0x3f...1c8",
-    avatar: "AR",
-    avatarColor: "from-[#ff6a00] to-rose-600 text-black",
-    strategy: "Arbitrage",
-    strategyColor: "bg-[#ff6a00]/10 text-[#ff6a00] border-[#ff6a00]/20",
-    sevenDay: "-1.2%",
-    sevenDayColor: "text-rose-500",
-    thirtyDay: "+8.4%",
-    thirtyDayPnL: "+$890",
-    drawdown: "1.1%",
-    lastTrade: "15m ago",
-    todayPnL: "-$45",
-    todayPnLColor: "text-rose-500",
-  },
-  {
-    id: "3",
-    name: "News Trading Beta",
-    address: "0x1d...4a9",
-    avatar: "NT",
-    avatarColor: "from-cyan-600 to-teal-600 text-white",
-    strategy: "News Trading",
-    strategyColor: "bg-teal-500/10 text-teal-400 border-teal-500/20",
-    sevenDay: "+12.1%",
-    sevenDayColor: "text-emerald-500",
-    thirtyDay: "+45.2%",
-    thirtyDayPnL: "+$8,100",
-    drawdown: "8.5%",
-    lastTrade: "1h ago",
-    todayPnL: "+$1,200",
-    todayPnLColor: "text-emerald-500",
-  },
-  {
-    id: "4",
-    name: "Liquidity Prov V3",
-    address: "0x9e...2b1",
-    avatar: "LQ",
-    avatarColor: "from-yellow-600 to-orange-600 text-white",
-    strategy: "Liquidity",
-    strategyColor: "bg-orange-500/10 text-orange-400 border-orange-500/20",
-    sevenDay: "+0.5%",
-    sevenDayColor: "text-emerald-500",
-    thirtyDay: "+2.1%",
-    thirtyDayPnL: "+$320",
-    drawdown: "0.2%",
-    lastTrade: "5m ago",
-    todayPnL: "+$15",
-    todayPnLColor: "text-emerald-500",
-  },
-];
-
-export function WatchlistTable() {
-  const [expandedBotId, setExpandedBotId] = useState<string | null>("2"); // Default to second bot expanded for demo
+export function WatchlistTable({ bots }: WatchlistTableProps) {
+  const [expandedBotId, setExpandedBotId] = useState<string | null>(
+    bots[0]?.botId ?? null,
+  );
 
   const toggleExpand = (id: string) => {
     setExpandedBotId(expandedBotId === id ? null : id);
   };
+
+  if (bots.length === 0) {
+    return (
+      <div className="bg-[#111111] border border-white/10 rounded-lg p-12 text-center">
+        <span className="material-symbols-outlined text-neutral-600 text-[48px] block mb-3">
+          bookmark_add
+        </span>
+        <p className="text-neutral-400 text-sm">No bots in your watchlist yet.</p>
+        <p className="text-neutral-600 text-xs mt-1">
+          Add bots from the leaderboard to track them here.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-[#111111] border border-white/10 rounded-lg overflow-hidden">
@@ -107,102 +40,77 @@ export function WatchlistTable() {
               <th className="px-6 py-3 font-medium w-[240px]">Bot</th>
               <th className="px-6 py-3 font-medium">Strategy</th>
               <th className="px-6 py-3 font-medium text-right">7D %</th>
-              <th className="px-6 py-3 font-bold text-white text-right">
-                30D %
-              </th>
+              <th className="px-6 py-3 font-bold text-white text-right">30D %</th>
               <th className="px-6 py-3 font-medium text-right">30D PnL</th>
               <th className="px-6 py-3 font-medium text-right">Drawdown</th>
-              <th className="px-6 py-3 font-medium text-right">Last Trade</th>
-              <th className="px-6 py-3 font-medium text-right">Today</th>
-              <th className="px-6 py-3 font-medium text-center w-[140px]">
-                Actions
-              </th>
+              <th className="px-6 py-3 font-medium text-right">Last Active</th>
+              <th className="px-6 py-3 font-medium text-center w-[100px]">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-white/5">
             {bots.map((bot) => {
-              const isExpanded = expandedBotId === bot.id;
+              const isExpanded = expandedBotId === bot.botId;
               return (
                 <>
                   <tr
-                    key={bot.id}
+                    key={bot.botId}
                     className={`transition-colors cursor-pointer ${
                       isExpanded
                         ? "bg-[#1A1A1A] border-l-2 border-l-[#ff6a00]"
                         : "group hover:bg-white/[0.02]"
                     }`}
-                    onClick={() => toggleExpand(bot.id)}
+                    onClick={() => toggleExpand(bot.botId)}
                   >
                     <td className={`px-6 ${isExpanded ? "py-4" : "py-3"}`}>
                       <div className="flex items-center gap-3">
                         <div
-                          className={`w-8 h-8 rounded bg-gradient-to-tr ${bot.avatarColor} flex items-center justify-center text-xs font-bold`}
-                          title="Bot Avatar"
+                          className={`w-8 h-8 rounded bg-gradient-to-tr from-[#ff6a00] to-amber-700 flex items-center justify-center text-xs font-bold text-white`}
                         >
-                          {bot.avatar}
+                          {bot.name.slice(0, 2).toUpperCase()}
                         </div>
                         <div className="flex flex-col">
-                          <span className="font-medium text-white">
-                            {bot.name}
-                          </span>
+                          <span className="font-medium text-white">{bot.name}</span>
                           <span className="text-xs text-neutral-500 font-mono">
-                            {bot.address}
+                            {bot.address.slice(0, 6)}...{bot.address.slice(-4)}
                           </span>
                         </div>
                       </div>
                     </td>
                     <td className={`px-6 ${isExpanded ? "py-4" : "py-3"}`}>
-                      <span
-                        className={`inline-flex items-center px-2 py-1 rounded text-xs border ${bot.strategyColor}`}
-                      >
+                      <span className="inline-flex items-center px-2 py-1 rounded bg-[#ff6a00]/10 text-[#ff6a00] text-xs border border-[#ff6a00]/20">
                         {bot.strategy}
                       </span>
                     </td>
                     <td
-                      className={`px-6 ${
-                        isExpanded ? "py-4" : "py-3"
-                      } text-right tabular-nums font-medium ${
-                        bot.sevenDayColor
+                      className={`px-6 ${isExpanded ? "py-4" : "py-3"} text-right tabular-nums font-medium ${
+                        bot.return7d >= 0 ? "text-emerald-500" : "text-rose-500"
                       }`}
                     >
-                      {bot.sevenDay}
+                      {formatPct(bot.return7d)}
                     </td>
                     <td
-                      className={`px-6 ${
-                        isExpanded ? "py-4" : "py-3"
-                      } text-right tabular-nums text-emerald-500 font-bold text-base`}
-                    >
-                      {bot.thirtyDay}
-                    </td>
-                    <td
-                      className={`px-6 ${
-                        isExpanded ? "py-4" : "py-3"
-                      } text-right tabular-nums text-emerald-500`}
-                    >
-                      {bot.thirtyDayPnL}
-                    </td>
-                    <td
-                      className={`px-6 ${
-                        isExpanded ? "py-4" : "py-3"
-                      } text-right tabular-nums text-neutral-300`}
-                    >
-                      {bot.drawdown}
-                    </td>
-                    <td
-                      className={`px-6 ${
-                        isExpanded ? "py-4" : "py-3"
-                      } text-right tabular-nums text-neutral-400`}
-                    >
-                      {bot.lastTrade}
-                    </td>
-                    <td
-                      className={`px-6 ${
-                        isExpanded ? "py-4" : "py-3"
-                      } text-right tabular-nums font-medium ${
-                        bot.todayPnLColor
+                      className={`px-6 ${isExpanded ? "py-4" : "py-3"} text-right tabular-nums font-bold text-base ${
+                        bot.return30d >= 0 ? "text-emerald-500" : "text-rose-500"
                       }`}
                     >
-                      {bot.todayPnL}
+                      {formatPct(bot.return30d)}
+                    </td>
+                    <td
+                      className={`px-6 ${isExpanded ? "py-4" : "py-3"} text-right tabular-nums ${
+                        bot.pnl30dUsd >= 0 ? "text-emerald-500" : "text-rose-500"
+                      }`}
+                    >
+                      {formatUsd(bot.pnl30dUsd)}
+                    </td>
+                    <td
+                      className={`px-6 ${isExpanded ? "py-4" : "py-3"} text-right tabular-nums text-neutral-300`}
+                    >
+                      {Math.abs(bot.maxDrawdownPct).toFixed(1)}%
+                    </td>
+                    <td
+                      className={`px-6 ${isExpanded ? "py-4" : "py-3"} text-right tabular-nums text-neutral-400`}
+                    >
+                      {timeAgo(bot.lastActiveAt)}
                     </td>
                     <td className={`px-6 ${isExpanded ? "py-4" : "py-3"}`}>
                       <div
@@ -221,43 +129,40 @@ export function WatchlistTable() {
                           }`}
                           onClick={(e) => {
                             e.stopPropagation();
-                            toggleExpand(bot.id);
+                            toggleExpand(bot.botId);
                           }}
                         >
-                          <span
-                            className={`material-symbols-outlined text-[20px] ${
-                              isExpanded ? "fill-1" : ""
-                            }`}
-                          >
+                          <span className="material-symbols-outlined text-[20px]">
                             {isExpanded ? "notifications" : "notifications_active"}
                           </span>
                         </button>
-                        <button className="w-8 h-8 flex items-center justify-center rounded hover:bg-white/10 text-neutral-400 hover:text-white transition-colors cursor-pointer">
+                        <a
+                          href={`/${bot.botId}`}
+                          className="w-8 h-8 flex items-center justify-center rounded hover:bg-white/10 text-neutral-400 hover:text-white transition-colors cursor-pointer"
+                          onClick={(e) => e.stopPropagation()}
+                        >
                           <span className="material-symbols-outlined text-[20px]">
                             open_in_new
                           </span>
-                        </button>
+                        </a>
                         <button className="w-8 h-8 flex items-center justify-center rounded hover:bg-white/10 text-neutral-400 hover:text-red-500 transition-colors cursor-pointer">
-                          <span className="material-symbols-outlined text-[20px]">
-                            close
-                          </span>
+                          <span className="material-symbols-outlined text-[20px]">close</span>
                         </button>
                       </div>
                     </td>
                   </tr>
-                  {/* Expanded Configuration Row */}
+                  {/* Expanded Alert Configuration Row */}
                   {isExpanded && (
-                    <tr className="bg-[#1A1A1A] border-l-2 border-l-[#ff6a00]/50 animate-in fade-in slide-in-from-top-1 duration-200">
-                      <td className="px-6 py-0" colSpan={9}>
-                        <div className="py-4 pl-12 pr-4 border-t border-white/5 flex gap-8">
-                          {/* Alert Settings Preview inside the expanded row */}
+                    <tr className="bg-[#1A1A1A] border-l-2 border-l-[#ff6a00]/50">
+                      <td className="px-6 py-0" colSpan={8}>
+                        <div className="py-4 pl-12 pr-4 border-t border-white/5">
                           <div className="flex-1 space-y-4">
                             <div className="flex items-center justify-between">
                               <h4 className="text-sm font-semibold text-white flex items-center gap-2">
                                 <span className="material-symbols-outlined text-[#ff6a00] text-[18px]">
                                   tune
                                 </span>
-                                Alert Configuration for {bot.name}
+                                Alert Configuration — {bot.name}
                               </h4>
                               <div className="flex gap-2">
                                 <button className="text-xs bg-white/5 hover:bg-white/10 text-white px-3 py-1.5 rounded transition-colors cursor-pointer">
@@ -269,18 +174,13 @@ export function WatchlistTable() {
                               </div>
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                              {/* Config Item 1 */}
                               <div className="bg-black/40 border border-white/5 p-3 rounded flex items-start gap-3">
                                 <div className="mt-0.5 text-neutral-400">
-                                  <span className="material-symbols-outlined text-[20px]">
-                                    trending_down
-                                  </span>
+                                  <span className="material-symbols-outlined text-[20px]">trending_down</span>
                                 </div>
                                 <div className="flex-1">
                                   <div className="flex items-center justify-between mb-1">
-                                    <span className="text-sm text-neutral-200">
-                                      Drawdown Threshold
-                                    </span>
+                                    <span className="text-sm text-neutral-200">Drawdown Threshold</span>
                                     <div className="relative inline-flex h-5 w-9 items-center rounded-full bg-[#ff6a00]">
                                       <span className="translate-x-4 inline-block h-3.5 w-3.5 transform rounded-full bg-black transition"></span>
                                     </div>
@@ -291,24 +191,17 @@ export function WatchlistTable() {
                                       type="text"
                                       defaultValue="5.0"
                                     />
-                                    <span className="text-xs text-neutral-500">
-                                      %
-                                    </span>
+                                    <span className="text-xs text-neutral-500">%</span>
                                   </div>
                                 </div>
                               </div>
-                              {/* Config Item 2 */}
                               <div className="bg-black/40 border border-white/5 p-3 rounded flex items-start gap-3">
                                 <div className="mt-0.5 text-neutral-400">
-                                  <span className="material-symbols-outlined text-[20px]">
-                                    payments
-                                  </span>
+                                  <span className="material-symbols-outlined text-[20px]">payments</span>
                                 </div>
                                 <div className="flex-1">
                                   <div className="flex items-center justify-between mb-1">
-                                    <span className="text-sm text-neutral-200">
-                                      PnL Milestone
-                                    </span>
+                                    <span className="text-sm text-neutral-200">PnL Milestone</span>
                                     <div className="relative inline-flex h-5 w-9 items-center rounded-full bg-neutral-700">
                                       <span className="translate-x-1 inline-block h-3.5 w-3.5 transform rounded-full bg-white transition"></span>
                                     </div>
@@ -320,24 +213,17 @@ export function WatchlistTable() {
                                       type="text"
                                       defaultValue="1000"
                                     />
-                                    <span className="text-xs text-neutral-500">
-                                      USDC
-                                    </span>
+                                    <span className="text-xs text-neutral-500">USDC</span>
                                   </div>
                                 </div>
                               </div>
-                              {/* Config Item 3 */}
                               <div className="bg-black/40 border border-white/5 p-3 rounded flex items-start gap-3">
                                 <div className="mt-0.5 text-neutral-400">
-                                  <span className="material-symbols-outlined text-[20px]">
-                                    mail
-                                  </span>
+                                  <span className="material-symbols-outlined text-[20px]">mail</span>
                                 </div>
                                 <div className="flex-1">
                                   <div className="flex items-center justify-between mb-1">
-                                    <span className="text-sm text-neutral-200">
-                                      Email Alerts
-                                    </span>
+                                    <span className="text-sm text-neutral-200">Email Alerts</span>
                                     <div className="relative inline-flex h-5 w-9 items-center rounded-full bg-[#ff6a00]">
                                       <span className="translate-x-4 inline-block h-3.5 w-3.5 transform rounded-full bg-black transition"></span>
                                     </div>
@@ -361,17 +247,8 @@ export function WatchlistTable() {
           </tbody>
         </table>
       </div>
-      {/* Pagination / Footer */}
       <div className="px-6 py-3 border-t border-white/10 flex items-center justify-between bg-[#1A1A1A]">
-        <div className="text-xs text-neutral-400">Showing 1-4 of 8 bots</div>
-        <div className="flex gap-2">
-          <button className="px-3 py-1 rounded bg-white/5 text-white/50 text-xs cursor-not-allowed">
-            Previous
-          </button>
-          <button className="px-3 py-1 rounded bg-white/10 hover:bg-white/20 text-white text-xs transition-colors cursor-pointer">
-            Next
-          </button>
-        </div>
+        <div className="text-xs text-neutral-400">Showing {bots.length} bots</div>
       </div>
     </div>
   );

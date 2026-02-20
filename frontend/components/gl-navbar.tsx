@@ -31,12 +31,6 @@ export function Navbar() {
             Watchlist
           </Link>
           <Link
-            href="/list"
-            className="text-sm font-medium text-gray-400 hover:text-white transition-colors"
-          >
-            Submit Bot
-          </Link>
-          <Link
             href="#"
             className="text-sm font-medium text-gray-400 hover:text-white transition-colors"
           >
@@ -45,12 +39,17 @@ export function Navbar() {
         </div>
       </div>
       <div className="flex items-center gap-4">
-        <button className="bg-[#ff6a00] hover:bg-[#ff7b1a] text-white text-sm font-bold h-9 px-4 rounded transition-colors flex items-center gap-2 cursor-pointer">
+        <a
+          href="/skills.md"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="bg-[#ff6a00] hover:bg-[#ff7b1a] text-white text-sm font-bold h-9 px-4 rounded transition-colors flex items-center gap-2 cursor-pointer"
+        >
           <span className="material-symbols-outlined text-[18px]">
-            account_balance_wallet
+            smart_toy
           </span>
-          Connect Wallet
-        </button>
+          Agent Skills
+        </a>
       </div>
     </nav>
   );

@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { FilterSidebar } from "@/components/leaderboard/FilterSidebar";
 import { StatsHeader } from "@/components/leaderboard/StatsHeader";
 import { BotTable } from "@/components/leaderboard/BotTable";

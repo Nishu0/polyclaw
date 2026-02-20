@@ -1,42 +1,60 @@
-export function WatchlistSummary() {
+import type { WatchlistSummaryData } from "@/lib/api";
+import { formatPct, formatUsd } from "@/lib/format";
+
+interface WatchlistSummaryProps {
+  summary: WatchlistSummaryData;
+}
+
+export function WatchlistSummary({ summary }: WatchlistSummaryProps) {
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 bg-[#111111] border border-white/10 rounded-lg divide-y md:divide-y-0 md:divide-x divide-white/10">
       <div className="p-4 flex flex-col gap-1">
         <span className="text-xs font-medium text-neutral-500 uppercase tracking-wider">
           Active Bots
         </span>
-        <span className="text-2xl font-bold text-white tabular-nums">8</span>
+        <span className="text-2xl font-bold text-white tabular-nums">
+          {summary.activeBots}
+        </span>
       </div>
       <div className="p-4 flex flex-col gap-1">
         <span className="text-xs font-medium text-neutral-500 uppercase tracking-wider">
           Total PnL (30D)
         </span>
         <div className="flex items-baseline gap-2">
-          <span className="text-2xl font-bold text-emerald-500 tabular-nums">
-            +$12,840
+          <span
+            className={`text-2xl font-bold tabular-nums ${
+              summary.totalPnl30dUsd >= 0 ? "text-emerald-500" : "text-rose-500"
+            }`}
+          >
+            {formatUsd(summary.totalPnl30dUsd)}
           </span>
-          <span className="text-xs font-medium text-emerald-500 bg-emerald-500/10 px-1.5 py-0.5 rounded">
-            +12.4%
+          <span
+            className={`text-xs font-medium px-1.5 py-0.5 rounded ${
+              summary.avgReturn30dPct >= 0
+                ? "text-emerald-500 bg-emerald-500/10"
+                : "text-rose-500 bg-rose-500/10"
+            }`}
+          >
+            {formatPct(summary.avgReturn30dPct)}
           </span>
         </div>
       </div>
       <div className="p-4 flex flex-col gap-1">
         <span className="text-xs font-medium text-neutral-500 uppercase tracking-wider">
-          Win Rate
+          Avg Win Rate
         </span>
         <div className="flex items-baseline gap-2">
           <span className="text-2xl font-bold text-white tabular-nums">
-            64.2%
+            {summary.avgWinRatePct.toFixed(1)}%
           </span>
-          <span className="text-xs font-medium text-emerald-500">+2.1%</span>
         </div>
       </div>
       <div className="p-4 flex flex-col gap-1">
         <span className="text-xs font-medium text-neutral-500 uppercase tracking-wider">
-          Volume Traded
+          Volume (24H)
         </span>
         <span className="text-2xl font-bold text-white tabular-nums">
-          $1.2M
+          {formatUsd(summary.totalVolumeUsd)}
         </span>
       </div>
     </div>

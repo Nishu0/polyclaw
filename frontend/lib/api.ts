@@ -75,6 +75,37 @@ export interface BotPosition {
   openedAt: string;
 }
 
+export interface WatchlistBot {
+  botId: string;
+  name: string;
+  address: string;
+  strategy: string;
+  active: boolean;
+  return7d: number;
+  return30d: number;
+  pnl30dUsd: number;
+  maxDrawdownPct: number;
+  lastActiveAt: string;
+  todayPnlUsd: number;
+}
+
+export interface WatchlistSummaryData {
+  activeBots: number;
+  totalPnl30dUsd: number;
+  avgReturn30dPct: number;
+  avgWinRatePct: number;
+  totalVolumeUsd: number;
+}
+
+export interface WatchlistAlert {
+  id: string;
+  type: string;
+  message: string;
+  detail: string;
+  isRead: boolean;
+  createdAt: string;
+}
+
 const API_BASE_URL =
   process.env.API_BASE_URL ??
   process.env.NEXT_PUBLIC_API_BASE_URL ??
@@ -104,4 +135,21 @@ export async function getBotDetails(id: string): Promise<BotDetailsResponse> {
 
 export async function getBotPositions(id: string): Promise<{ data: BotPosition[] }> {
   return apiFetch<{ data: BotPosition[] }>(`/api/bots/${id}/positions?status=open`);
+}
+
+export async function getWatchlistSummary(userAddress: string): Promise<WatchlistSummaryData> {
+  return apiFetch<WatchlistSummaryData>(`/api/watchlist/${userAddress}/summary`);
+}
+
+export async function getWatchlistBots(userAddress: string): Promise<{ data: WatchlistBot[] }> {
+  return apiFetch<{ data: WatchlistBot[] }>(`/api/watchlist/${userAddress}/bots`);
+}
+
+export async function getWatchlistAlerts(
+  userAddress: string,
+  limit = 20,
+): Promise<{ data: WatchlistAlert[] }> {
+  return apiFetch<{ data: WatchlistAlert[] }>(
+    `/api/watchlist/${userAddress}/alerts?limit=${limit}`,
+  );
 }

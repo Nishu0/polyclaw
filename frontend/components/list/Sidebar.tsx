@@ -103,7 +103,7 @@ export function Sidebar() {
                   01.
                 </span>
                 <p className="text-xs text-gray-400">
-                  Connect wallet to verify identity.
+                  Paste your Polymarket Safe wallet address.
                 </p>
               </li>
               <li className="flex gap-3 items-start">
@@ -111,7 +111,7 @@ export function Sidebar() {
                   02.
                 </span>
                 <p className="text-xs text-gray-400">
-                  Sign a message to prove you own the address.
+                  Fill in your bot name and strategy details.
                 </p>
               </li>
               <li className="flex gap-3 items-start">
@@ -119,15 +119,7 @@ export function Sidebar() {
                   03.
                 </span>
                 <p className="text-xs text-gray-400">
-                  Configure public profile and strategy tags.
-                </p>
-              </li>
-              <li className="flex gap-3 items-start">
-                <span className="font-mono text-xs text-[#FF6B00] mt-0.5">
-                  04.
-                </span>
-                <p className="text-xs text-gray-400">
-                  Go live instantly on the leaderboard.
+                  Submit and go live on the leaderboard.
                 </p>
               </li>
             </ul>
